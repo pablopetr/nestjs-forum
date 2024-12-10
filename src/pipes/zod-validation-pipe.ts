@@ -9,11 +9,12 @@ import { fromZodError } from 'zod-validation-error';
 export class ZodValidationPipe implements PipeTransform {
   constructor(private schema: ZodSchema) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   transform(value: unknown, metadata: ArgumentMetadata) {
     try {
       return this.schema.parse(value);
     } catch (error) {
-      if(error instanceof ZodError) {
+      if (error instanceof ZodError) {
         throw new BadRequestException({
           message: 'Validation failed.',
           statusCode: 400,

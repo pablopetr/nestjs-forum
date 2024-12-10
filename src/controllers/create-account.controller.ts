@@ -1,7 +1,14 @@
-import { Body, ConflictException, Controller, Post, UsePipes } from '@nestjs/common';
+import {
+  Body,
+  ConflictException,
+  Controller,
+  Post,
+  UsePipes,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { z } from 'zod';
 import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
+import { hash } from 'bcryptjs';
 
 const createAccountBodySchema = z.object({
   name: z.string(),
@@ -30,11 +37,13 @@ export class CreateAccountController {
       throw new ConflictException('User with this email already exists');
     }
 
+    const hashedPassword = await hash(password, 10);
+
     return this.prisma.user.create({
       data: {
         name,
         email,
-        password,
+        password: hashedPassword,
       },
     });
   }
