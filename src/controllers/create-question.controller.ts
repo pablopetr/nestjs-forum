@@ -5,13 +5,17 @@ import { z } from 'zod';
 import { JwtAuthGuard } from '../auth/jwt.auth.guard';
 import type { Request } from 'express';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { UserPayload } from '../auth/jwt.strategy';
+import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 
-const authenticateBodySchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
+const createQuestionBodySchema = z.object({
+  title: z.string(),
+  content: z.string(),
 });
 
-export type TokenPayload = z.infer<typeof authenticateBodySchema>;
+const bodyValidationPipe = new ZodValidationPipe(createQuestionBodySchema);
+
+type CreateQuestionBodySchema = z.infer<typeof createQuestionBodySchema>;
 
 @Controller('/questions')
 @UseGuards(JwtAuthGuard)
@@ -22,9 +26,29 @@ export class CreateQuestionController {
   ) {}
 
   @Post()
-  async handle(@CurrentUser() user: TokenPayload) {
-    console.log(user);
+  async handle(
+    @Body(bodyValidationPipe) body: CreateQuestionBodySchema,
+    @CurrentUser()
+    user: UserPayload,
+  ) {
+    const { title, content } = body;
 
-    return `ok`;
+    await this.prisma.question.create({
+      data: {
+        title,
+        slug: this.convertToSlug(title),
+        content,
+        authorId: user.sub,
+      },
+    });
+  }
+
+  private convertToSlug(title: string): string {
+    return title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-');
   }
 }
