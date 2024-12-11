@@ -1,16 +1,17 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { z } from 'zod';
-import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from '../auth/jwt.auth.guard';
+import type { Request } from 'express';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 const authenticateBodySchema = z.object({
   email: z.string().email(),
   password: z.string(),
 });
 
-type AuthenticateBodySchema = z.infer<typeof authenticateBodySchema>;
+export type TokenPayload = z.infer<typeof authenticateBodySchema>;
 
 @Controller('/questions')
 @UseGuards(JwtAuthGuard)
@@ -21,7 +22,9 @@ export class CreateQuestionController {
   ) {}
 
   @Post()
-  async handle(@Body() body: AuthenticateBodySchema) {
+  async handle(@CurrentUser() user: TokenPayload) {
+    console.log(user);
+
     return `ok`;
   }
 }
