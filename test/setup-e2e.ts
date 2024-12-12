@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
-import 'dotenv/config'
-import { randomUUID } from 'node:crypto'
-import { execSync } from 'node:child_process'
+import 'dotenv/config';
+import { randomUUID } from 'node:crypto';
+import { execSync } from 'node:child_process';
 
-const  prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-if(!process.env.DATABASE_URL) {
+if (!process.env.DATABASE_URL) {
   throw new Error('Please, provide a DATABASE_URL');
 }
 
@@ -14,7 +14,7 @@ function generateUniqueDatabaseURL(schemaId: string) {
 
   url.searchParams.set('schema', schemaId);
 
-  return url.toString()
+  return url.toString();
 }
 
 const schemaId = randomUUID();
@@ -22,14 +22,12 @@ const schemaId = randomUUID();
 beforeAll(() => {
   const databaseURL = generateUniqueDatabaseURL(schemaId);
 
-  console.log(databaseURL);
-
   process.env.DATABASE_URL = databaseURL;
 
-  execSync('npx prisma migrate deploy')
+  execSync('npx prisma migrate deploy');
 });
 
 afterAll(async () => {
-  await prisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schemaId}" CASCADE`)
+  await prisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schemaId}" CASCADE`);
   await prisma.$disconnect();
 });
