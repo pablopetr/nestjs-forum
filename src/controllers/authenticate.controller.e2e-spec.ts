@@ -12,8 +12,7 @@ describe('Authenticate (E2E)', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .compile();
+    }).compile();
 
     app = moduleRef.createNestApplication();
 
@@ -28,22 +27,19 @@ describe('Authenticate (E2E)', () => {
         name: 'John Doe',
         email: 'johndoe@example.com',
         password: await hash('password', 8),
-      }
+      },
     });
 
     const userOnDatabase = await prisma.user.findUnique({
       where: {
         email: 'johndoe@example.com',
-      }
-    })
+      },
+    });
 
-    const response = await request(app.getHttpServer())
-      .post('/sessions')
-      .send({
-        email: 'johndoe@example.com',
-        password: 'password',
-      });
-
+    const response = await request(app.getHttpServer()).post('/sessions').send({
+      email: 'johndoe@example.com',
+      password: 'password',
+    });
 
     expect(response.statusCode).toBe(201);
 

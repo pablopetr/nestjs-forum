@@ -11,8 +11,7 @@ describe('Create Account (E2E)', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .compile();
+    }).compile();
 
     app = moduleRef.createNestApplication();
 
@@ -22,21 +21,19 @@ describe('Create Account (E2E)', () => {
   });
 
   test('[POST] /accounts', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/accounts')
-      .send({
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        password: 'password',
-      })
+    const response = await request(app.getHttpServer()).post('/accounts').send({
+      name: 'John Doe',
+      email: 'johndoe@example.com',
+      password: 'password',
+    });
 
     const userOnDatabase = await prisma.user.findUnique({
       where: {
         email: 'johndoe@example.com',
-      }
-    })
+      },
+    });
 
     expect(response.statusCode).toBe(201);
     expect(userOnDatabase).toBeTruthy();
-  })
+  });
 });
