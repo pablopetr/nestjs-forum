@@ -1,29 +1,29 @@
-import { AppModule } from '@/app.module';
-import { Test } from '@nestjs/testing';
-import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
-import { hash } from 'bcryptjs';
-import { JwtService } from '@nestjs/jwt';
-import { expect } from 'vitest';
+import { AppModule } from '@/app.module'
+import { Test } from '@nestjs/testing'
+import request from 'supertest'
+import { INestApplication } from '@nestjs/common'
+import { PrismaService } from '@/prisma/prisma.service'
+import { hash } from 'bcryptjs'
+import { JwtService } from '@nestjs/jwt'
+import { expect } from 'vitest'
 
 describe('Create Question (E2E)', () => {
-  let app: INestApplication;
-  let prisma: PrismaService;
-  let jwt: JwtService;
+  let app: INestApplication
+  let prisma: PrismaService
+  let jwt: JwtService
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    }).compile()
 
-    app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication()
 
-    prisma = moduleRef.get(PrismaService);
-    jwt = moduleRef.get(JwtService);
+    prisma = moduleRef.get(PrismaService)
+    jwt = moduleRef.get(JwtService)
 
-    await app.init();
-  });
+    await app.init()
+  })
 
   test('[GET] /questions', async () => {
     const user = await prisma.user.create({
@@ -32,9 +32,9 @@ describe('Create Question (E2E)', () => {
         email: 'johndoe@example.com',
         password: await hash('password', 8),
       },
-    });
+    })
 
-    const accessToken = jwt.sign({ sub: user.id });
+    const accessToken = jwt.sign({ sub: user.id })
 
     // Create a question
     await prisma.question.createMany({
@@ -52,13 +52,13 @@ describe('Create Question (E2E)', () => {
           authorId: user.id,
         },
       ],
-    });
+    })
 
     const response = await request(app.getHttpServer())
       .get('/questions')
-      .set('Authorization', `Bearer ${accessToken}`);
+      .set('Authorization', `Bearer ${accessToken}`)
 
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(200)
 
     expect(response.body).toEqual({
       questions: [
@@ -73,6 +73,6 @@ describe('Create Question (E2E)', () => {
           content: 'I need help, again.',
         }),
       ],
-    });
-  });
-});
+    })
+  })
+})
