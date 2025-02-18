@@ -18,10 +18,6 @@ export abstract class Entity<Props> {
       return true
     }
 
-    if (entity.id === this._id) {
-      return true
-    }
-
-    return false
+    return entity.id === this._id
   }
 }
